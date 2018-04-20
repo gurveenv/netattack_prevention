@@ -1,0 +1,3105 @@
+DOS Prevention
+# A 50-node example for ad-hoc simulation with AODV
+
+# Define options
+set val(chan)     	Channel/WirelessChannel  	;# channel type
+set val(prop)		Propagation/TwoRayGround	;# radio-propagation model
+set val(netif)		Phy/WirelessPhy			;# network interface type
+set val(mac)		Mac/802_11			;#MAC type
+set val(ifq)		Queue/DropTail/PriQueue		;# interface queue type
+set val(ll)		LL				;# link layer type
+set val(ant)		Antenna/OmniAntenna		;# antenna model
+set val(ifqlen)		50				;# max packet in ifq
+set val(nn)		50				;# number of mobilenodes
+set val(rp)		AODV				;# routing protocol
+set val(x)		800				;# X dimension of topography
+set val(y)		800				;#  dimension of topography
+set val(stop)		100				;# time of simulation end
+
+set ns [new Simulator]
+
+$ns use-newtrace
+set tracefd	[open dosp.tr w]
+
+
+
+set namtrace	[open dosp.nam w]
+$ns namtrace-all-wireless $namtrace $val(x) $val(y)
+$ns trace-all $tracefd
+
+
+
+# ======================================================================
+# set up the antennas to be centered in the node and 2.5 meters above it
+Antenna/OmniAntenna set X_ 0
+Antenna/OmniAntenna set Y_ 0
+Antenna/OmniAntenna set Z_ 1.5
+Antenna/OmniAntenna set Gt_ 1.0
+Antenna/OmniAntenna set Gr_ 1.0
+# Initialize the SharedMedia interface with parameters to make
+# it work like the 914MHz Lucent WaveLAN DSSS radio interface
+Phy/WirelessPhy set CPThresh_ 20.0	;# receive power threshold
+Phy/WirelessPhy set CSThresh_ 1.559e-11	;# -108.07154db carrier sense thresh
+Phy/WirelessPhy set RXThresh_ 3.652e-10 
+Phy/WirelessPhy set Rb_ 2*1e6
+Phy/WirelessPhy set Pt_ 0.2818      ;# For 250m  transmission range.
+Phy/WirelessPhy set freq_ 914e+6 		;# frequency
+Phy/WirelessPhy set L_ 0.2		;# system loss factor
+Phy/WirelessPhy set Pt_consume_ 0.660  	;# 1.6 W drained power for tx
+Phy/WirelessPhy set Pr_consume_ 0.395 	;# 1.2 W drained power for reception
+Phy/WirelessPhy set P_idle_ 0.035		;# 1.15 W drained power for idle
+#=================================================================================
+
+# define color index
+$ns color 0 blue
+$ns color 1 red
+$ns color 2 chocolate
+$ns color 4 brown
+$ns color 5 tan
+$ns color 6 gold
+$ns color 7 black               
+
+#set up topography object
+
+set topo [new Topography]
+
+# define topology
+$topo load_flatgrid $val(x) $val(y)
+
+
+ set god_ [create-god $val(nn)]
+
+
+#Create nn mobilenodes [$val(nn)] and attach them to the channel.
+
+set chan_1 [new $val(chan)]
+
+#cofigure the nodes
+
+$ns node-config  -adhocRouting $val(rp) \
+		-llType $val(ll) \
+		-macType $val(mac)  \
+		-ifqType $val(ifq)  \
+		-ifqLen $val(ifqlen) \
+		-antType $val(ant) \
+		-propType $val(prop) \
+		-phyType $val(netif) \
+		-channelType $val(chan) \
+		-topoInstance $topo \
+		-agentTrace ON \
+		-routerTrace ON \
+		-macTrace OFF \
+		-movemenTrace ON 
+
+
+
+#next-hop information
+$ns compute-routes            
+
+## Creating node objects..                
+      for {set i 0} {$i < $val(nn) } { incr i } {
+            set node($i) [$ns node]      
+      }
+
+for {set i 0} {$i < $val(nn)} {incr i} {
+      $node($i) color darkgreen
+      $ns at 0.0 "$node($i) color darkgreen"
+      }
+
+## Provide initial location of mobilenodes..
+            
+          
+	             
+                  
+$node(0) set X_ 500
+$node(0) set Y_ 500
+
+$node(1) set X_ 800
+$node(1) set Y_ 200
+
+$node(2) set X_ 300
+$node(2) set Y_ 400
+
+$node(3) set X_ 700
+$node(3) set Y_ 100
+
+$node(4) set X_ 500
+$node(4) set Y_ 200
+
+$node(5) set X_ 800
+$node(5) set Y_ 800
+
+$node(6) set X_ 600
+$node(6) set Y_ 300
+
+$node(7) set X_ 150
+$node(7) set Y_ 150
+
+$node(8) set X_ 200
+$node(8) set Y_ 150
+
+$node(9) set X_ 100
+$node(9) set Y_ 300
+
+$node(10) set X_ 400
+$node(10) set Y_ 450
+
+$node(11) set X_ 600
+$node(11) set Y_ 350
+
+$node(12) set X_ 550
+$node(12) set Y_ 800
+
+$node(13) set X_ 600
+$node(13) set Y_ 300
+
+$node(14) set X_ 450
+$node(14) set Y_ 600
+
+$node(15) set X_ 250
+$node(15) set Y_ 200
+
+$node(16) set X_ 600
+$node(16) set Y_ 500
+
+$node(17) set X_ 450
+$node(17) set Y_ 400
+
+$node(18) set X_ 650
+$node(18) set Y_ 500
+
+$node(19) set X_ 750
+$node(19) set Y_ 250
+
+$node(20) set X_ 650
+$node(20) set Y_ 800
+
+$node(21) set X_ 250
+$node(21) set Y_ 600
+
+$node(22) set X_ 350
+$node(22) set Y_ 550
+
+$node(23) set X_ 600
+$node(23) set Y_ 600
+
+$node(24) set X_ 300
+$node(24) set Y_ 750
+
+$node(25) set X_ 750
+$node(25) set Y_ 750
+
+$node(26) set X_ 750
+$node(26) set Y_ 100
+
+$node(27) set X_ 100
+$node(27) set Y_ 50
+
+$node(28) set X_ 600
+$node(28) set Y_ 450
+
+$node(29) set X_ 250
+$node(29) set Y_ 450
+
+$node(30) set X_ 800
+$node(30) set Y_ 700
+
+$node(31) set X_ 150
+$node(31) set Y_ 250
+
+$node(32) set X_ 300
+$node(32) set Y_ 300
+
+$node(33) set X_ 150
+$node(33) set Y_ 600
+
+$node(34) set X_ 100
+$node(34) set Y_ 600
+
+$node(35) set X_ 400
+$node(35) set Y_ 200
+
+$node(36) set X_ 200
+$node(36) set Y_ 300
+
+$node(37) set X_ 350
+$node(37) set Y_ 600
+
+$node(38) set X_ 270
+$node(38) set Y_ 100
+
+$node(39) set X_ 380
+$node(39) set Y_ 300
+
+$node(40) set X_ 650
+$node(40) set Y_ 150
+
+$node(41) set X_ 600
+$node(41) set Y_ 250
+
+$node(42) set X_ 400
+$node(42) set Y_ 550
+
+$node(43) set X_ 800
+$node(43) set Y_ 400
+
+$node(44) set X_ 350
+$node(44) set Y_ 150
+
+$node(45) set X_ 680
+$node(45) set Y_ 180
+
+$node(46) set X_ 350
+$node(46) set Y_ 300
+
+$node(47) set X_ 700
+$node(47) set Y_ 400
+
+$node(48) set X_ 300
+$node(48) set Y_ 200
+
+$node(49) set X_ 550
+$node(49) set Y_ 500
+
+
+  
+
+## Define node initial position in nam..
+      for {set i 0} {$i < $val(nn)} { incr i } {
+      # 30 defines the node size for nam..
+            $ns initial_node_pos $node($i) 30
+      }
+
+
+
+
+#Generation of mobile nodes 
+
+$ns at 5.0  "$node(0) setdest 150.0 250.0 15.0"
+$ns at 15.0 "$node(1) setdest 50.0 240.0 3.0"
+$ns at 50.0 "$node(2) setdest 450.0 300.0 28.0"
+$ns at 16.0 "$node(3) setdest 10.0 300.0 14.0"
+$ns at 13.0 "$node(4) setdest 1.0 1.0 4.0"
+$ns at 14.0 "$node(5) setdest 10.0 34.0 13.0"
+$ns at 13.0 "$node(6) setdest 25.0 100.0 6.0"
+$ns at 20.0 "$node(7) setdest 50.0 150.0 10.0"
+$ns at 21.0 "$node(8) setdest 60.0 200.0 8.0"
+$ns at 24.0 "$node(9) setdest 150.0 10.0 10.0"
+$ns at 34.0 "$node(10) setdest 250.0 10.0 10.0"
+$ns at 40.0 "$node(11) setdest 300.0 300.0 2.0"
+$ns at 37.0 "$node(12) setdest 10.0 340.0 3.0"
+$ns at 47.0 "$node(13) setdest 100.0 340.0 5.0"
+$ns at 17.0 "$node(14) setdest 10.0 240.0 10.0"
+$ns at 13.0 "$node(15) setdest 10.0 140.0 3.0"
+$ns at 15.0 "$node(16) setdest 600.0 200.0 5.0"
+$ns at 7.0 "$node(17) setdest 600.0 34.0 30.0"
+$ns at 1.0 "$node(18) setdest 700.0 14.0 12.0"
+$ns at 6.0 "$node(19) setdest 400.0 25.0 6.0"
+$ns at 7.0 "$node(20) setdest 500.0 500.0 8.0"
+$ns at 8.0 "$node(21) setdest 300.0 400.0 3.0"
+$ns at 18.0 "$node(22) setdest 300.0 30.0 11.0"
+$ns at 5.0 "$node(23) setdest 150.0 150.0 1.0"
+$ns at 3.0 "$node(24) setdest 8.0 80.0 21.0"
+$ns at 2.0 "$node(25) setdest 10.0 450.0 20.0"
+$ns at 1.0 "$node(26) setdest 180.0 240.0 25.0"
+$ns at 9.0 "$node(27) setdest 10.0 400.0 14.0"
+$ns at 8.0 "$node(28) setdest 250.0 440.0 23.0"
+$ns at 6.0 "$node(29) setdest 50.0 3.0 15.0"
+$ns at 10.0 "$node(30) setdest 10.0 300.0 15.0"
+$ns at 16.0 "$node(31) setdest 550.0 10.0 1.0"
+$ns at 6.0 "$node(32) setdest 250.0 3.0 5.0"
+$ns at 23.0 "$node(33) setdest 50.0 60.0 8.0"
+$ns at 30.0 "$node(34) setdest 100.0 3.0 25.0"
+$ns at 44.0 "$node(35) setdest 10.0 19.0 10.0"
+$ns at 8.0 "$node(36) setdest 50.0 35.0 1.0"
+$ns at 18.0 "$node(37) setdest 50.0 3.0 6.0"
+$ns at 49.0 "$node(38) setdest 10.0 120.0 20.0"
+$ns at 6.0 "$node(39) setdest 50.0 12.0 15.0"
+$ns at 9.0 "$node(40) setdest 300.0 3.0 7.0"
+$ns at 20.0 "$node(41) setdest 200.0 40.0 5.0"
+$ns at 9.0 "$node(42) setdest 50.0 10.0 25.0"
+$ns at 60.0 "$node(43) setdest 500.0 500.0 2.0"
+$ns at 17.0 "$node(44) setdest 100.0 90.0 14.0"
+$ns at 26.0 "$node(45) setdest 50.0 3.0 5.0"
+$ns at 22.0 "$node(46) setdest 350.0 400.0 10.0"
+$ns at 29.0 "$node(47) setdest 500.0 9.0 3.0"
+$ns at 3.0 "$node(48) setdest 250.0 140.0 15.0"
+$ns at 6.0 "$node(49) setdest 10.0 300.0 19.0"
+
+
+
+#Set a TCP connection between node 17 and node 4
+
+set tcp1 [new Agent/TCP/Newreno]
+$tcp1 set class_ 1
+set sink1 [new Agent/TCPSink]
+$ns attach-agent $node(17) $tcp1
+$ns attach-agent $node(4) $sink1
+$ns connect $tcp1 $sink1
+set ftp1 [new Application/FTP]
+$ftp1 attach-agent $tcp1
+$ns at 5.0 "$ftp1 start"
+$tcp1 set fid_ 2
+$ns at 5.0 " $node(17) color tan" 
+$ns at 5.0 " $node(4) color tan" 
+
+
+
+
+#set a tcp connection between node 42 and node 44
+set tcp2 [new Agent/TCP/Newreno]
+$tcp2 set class_ 1
+set sink11 [new Agent/TCPSink]
+$ns attach-agent $node(42) $tcp2
+$ns attach-agent $node(44) $sink11
+$ns connect $tcp2 $sink11
+set ftp2 [new Application/FTP]
+$ftp2 attach-agent $tcp2
+$ns at 2.0 "$ftp2 start"
+$tcp2 set fid_ 2
+$ns at 2.0 " $node(42) color brown" 
+$ns at 2.0 " $node(44) color brown" 
+
+
+
+#set a tcp connection between node 3 and node 32
+set tcp3 [new Agent/TCP/Newreno]
+$tcp3 set class_ 1
+set sink12 [new Agent/TCPSink]
+$ns attach-agent $node(3) $tcp3
+$ns attach-agent $node(32) $sink12
+$ns connect $tcp3 $sink12
+set ftp3 [new Application/FTP]
+$ftp3 attach-agent $tcp3
+$ns at 4.0 "$ftp3 start"
+$tcp3 set fid_ 2
+$ns at 4.0 " $node(3) color gold" 
+$ns at 4.0 " $node(32) color gold" 
+
+
+
+#set a tcp connection between node 9 and node 36
+set tcp4 [new Agent/TCP/Newreno]
+$tcp4 set class_ 1
+set sink13 [new Agent/TCPSink]
+$ns attach-agent $node(9) $tcp4
+$ns attach-agent $node(36) $sink13
+$ns connect $tcp4 $sink13
+set ftp4 [new Application/FTP]
+$ftp4 attach-agent $tcp4
+$ns at 1.0 "$ftp4 start"
+$tcp4 set fid_ 2
+$ns at 1.0 " $node(9) color gold" 
+$ns at 1.0 " $node(36) color gold" 
+
+
+
+#set a tcp connection between node 39 and node 14
+set tcp5 [new Agent/TCP/Newreno]
+$tcp5 set class_ 1
+set sink14 [new Agent/TCPSink]
+$ns attach-agent $node(39) $tcp5
+$ns attach-agent $node(14) $sink14
+$ns connect $tcp5 $sink14
+set ftp5 [new Application/FTP]
+$ftp5 attach-agent $tcp5
+$ns at 4.0 "$ftp5 start"
+$tcp5 set fid_ 2
+$ns at 4.0 " $node(39) color red" 
+$ns at 4.0 " $node(14) color red" 
+###############
+
+#set a udp connection between node 10 and node 18
+set udp1 [new Agent/UDP]
+
+$ns attach-agent $node(18) $udp1
+
+set sink4 [new Agent/LossMonitor]
+
+$ns attach-agent $node(10) $sink4
+$ns connect $udp1 $sink4
+
+
+$ns at 2.0 " $node(10) color Green" 
+$ns at 2.0 " $node(18) color Green" 
+
+
+#set a udp connection between node 41 and node 3
+set udp2 [new Agent/UDP]
+
+$ns attach-agent $node(41) $udp2
+
+set sink5 [new Agent/LossMonitor]
+
+$ns attach-agent $node(3) $sink5
+$ns connect $udp2 $sink5
+
+$ns at 3.0 " $node(3) color brown" 
+$ns at 3.0 " $node(41) color brown" 
+
+#set a udp connection between node 33 and node 37
+set udp3 [new Agent/UDP]
+
+$ns attach-agent $node(33) $udp3
+
+set sink8 [new Agent/LossMonitor]
+
+$ns attach-agent $node(37) $sink8
+$ns connect $udp3 $sink8
+
+$ns at 5.0 " $node(33) color red" 
+$ns at 5.0 " $node(37) color red" 
+
+
+
+#set a udp connection between node 28 and node 30
+set udp4 [new Agent/UDP]
+
+$ns attach-agent $node(28) $udp4
+
+set sink9 [new Agent/LossMonitor]
+
+$ns attach-agent $node(30) $sink9
+$ns connect $udp4 $sink9
+
+$ns at 1.0 " $node(28) color blue" 
+$ns at 1.0 " $node(30) color blue" 
+
+
+
+#set a udp connection between node 1 and node 16
+set udp5 [new Agent/UDP]
+
+$ns attach-agent $node(1) $udp5
+
+set sink15 [new Agent/LossMonitor]
+
+$ns attach-agent $node(16) $sink15
+$ns connect $udp5 $sink15
+
+$ns at 2.0 " $node(16) color brown" 
+$ns at 2.0 " $node(1) color brown" 
+
+
+proc attach-CBR-traffic { node sink size interval } {
+   #Get an instance of the simulator
+   set ns [Simulator instance]
+   #Create a CBR  agent and attach it to the node
+   set cbr [new Agent/CBR]
+   $ns attach-agent $node $cbr
+   $cbr set packetSize_ $size
+   $cbr set interval_ $interval
+
+   #Attach CBR source to sink;
+   $ns connect $cbr $sink
+   return $cbr
+  }
+
+set cbr1 [attach-CBR-traffic $node(18) $sink4 1000 .45]
+$ns at 2.0 "$cbr1 start"
+set cbr2 [attach-CBR-traffic $node(41) $sink5 1000 .35]
+$ns at 3.0 "$cbr2 start"
+set cbr3 [attach-CBR-traffic $node(33) $sink8 512 .4]
+$ns at 5.0 "$cbr3 start"
+set cbr4 [attach-CBR-traffic $node(47) $sink9 512 .2]
+$ns at 1.0 "$cbr4 start"
+set cbr5 [attach-CBR-traffic $node(45) $sink15 512 .6]
+$ns at 2.0 "$cbr5 start"
+
+
+proc record {} {
+  global  sink4 sink5 sink8 sink9 sink15 f0 f1 f2
+   #Get An Instance Of The Simulator
+   set ns [Simulator instance]
+   
+   #Set The Time After Which The Procedure Should Be Called Again
+   set time 0.05
+   #How Many Bytes Have Been Received By The Traffic Sinks?
+   set bw0 [$sink4 set npkts_]
+   set bw1 [$sink4 set nlost_]  
+   set bw2 [expr $bw0+ $bw1]
+   set bw3 [$sink5 set npkts_]
+   set bw4 [$sink5 set nlost_]  
+   set bw5 [expr $bw3+ $bw4]
+   
+ set bw6 [$sink8 set npkts_]
+   set bw7 [$sink8 set nlost_]  
+   set bw8 [expr $bw6+ $bw7]
+  
+ set bw9 [$sink9 set npkts_]
+   set bw10 [$sink9 set nlost_]  
+   set bw11 [expr $bw9+ $bw10]
+  
+ set bw12 [$sink15 set npkts_]
+   set bw13 [$sink15 set nlost_]  
+   set bw14 [expr $bw12+ $bw13]
+  
+ 
+  
+   #Get The Current Time
+   set now [$ns now]
+   
+    #Re-Schedule The Procedure
+   $ns at [expr $now+$time] "record"
+  }
+
+
+# printing the window size 
+proc plotWindow {tcpSource file} {
+global ns
+set time 0.01
+set now [$ns now]
+
+set cwnd [$tcpSource set cwnd_]
+puts $file "$now $cwnd"
+$ns at [expr $now+$time] "plotWindow $tcpSource $file" }
+
+
+#Telling nodes when the simulation ends
+for {set i 0} {$i < $val(nn)} { incr i } {
+	$ns at $val(stop) "$node($i) reset" ;
+}
+
+
+
+###DOS Attack##########
+
+set ON 1
+set OFF 0
+
+# enable debugging by default
+#set verbose ON
+
+set dos 40
+
+
+set total_host 200000
+
+set probing_port [Application/Worm set ScanPort]
+# probing packet size
+# slammer Worm UDP packets of 404 Bytes
+set p_size 404
+ 
+Application/Worm set ScanPacketSize $p_size
+Agent/MessagePassing set packetSize_ $p_size
+
+#	Application/Worm set ScanRate 1
+
+# 1.config the Normal network
+for {set i 0} {$i < 40} {incr i} {
+    set a($i) [new Agent/MessagePassing]
+    $node($i) attach $a($i) $probing_port
+    set w($i) [new Application/Worm/Dnh]
+    $w($i) attach-agent $a($i)
+    $w($i) addr-range 0 [expr $val(nn)- 2]
+    
+}
+
+
+# 2. set up Attacker node
+set a(40) [new Agent/MessagePassing]
+$node(40) attach $a(40) $probing_port
+set w(40) [new Application/Worm/An]
+$w(40) attach-agent $a(40)
+$w(40) addr-range 40 $total_host
+$w(40) dn-range 0 46
+#$w(40) gamma 1
+$w(40) v_percent 0.46
+$w(40) beta 0.4
+
+
+# recv all packets coming in
+set p [$node(40) set dmux_]
+$p defaulttarget $a(40) 
+
+#[$node($an_id) entry] defaulttarget $p
+
+
+
+####END DOS Attack#######
+
+###### Prevention#############
+
+if {[set p [$node(40) set dmux_]] <=  0.02 } {
+
+puts "node(40) blocked by prevention"
+
+$w(40) gamma 1.0
+# recv all packets coming in
+set p [$node(40) set dmux_]
+$p defaulttarget $a(40) 
+
+#[$node(40) entry] defaulttarget $p
+}
+
+ 
+#ids module method#######
+for {set i 0} {$i < $val(nn) } { incr i } {
+$ns node-config -adhocRouting idsRPL $node(21)
+		set tr($i) [set idsaodv/idsaodv prevention(tr)]
+		if { $tr($i) <= 0 &&  {[set message  != "AODV"] || [set message  != "TCP"] || [set message  != "UDP"] || [set message  != "cbr"] {[set p [$node(40) set dmux_]] < 0.02}} } {
+		$ns compute-routes
+		
+		} 
+	if { $tr($i) > 0.2 && $tr($i) <= 0.8} {
+		set recv $recvReply
+	} else {
+			set hello [set idsaodv/idsaodv sendHello()]
+		}
+		
+      }
+
+##################### Prevention#############
+
+# now starts infection
+$ns at 80.0 "$w(40) start"
+$ns at 85.0 "$w(40) stop"
+
+
+$ns at 1.0 "$node(21) label \"Preventor\""
+
+#start ftp transmission
+$ns at 5.0 "$node(17) label \"FTP\""
+$ns at 5.0 "$node(4) label \"FTP\""
+$ns at 5.0 "$node(42) label \"FTP\""
+$ns at 1.0 "$node(44) label \"FTP\""
+$ns at 4.0 "$node(32) label \"FTP\""
+$ns at 4.0 "$node(3) label \"FTP\""
+$ns at 2.0 "$node(9) label \"FTP\""
+$ns at 4.0 "$node(36) label \"FTP\""
+$ns at 1.0 "$node(39) label \"FTP\""
+$ns at 4.0 "$node(14) label \"FTP\""
+$ns at 2.0 "$node(10) label \"CBR\""
+$ns at 2.0 "$node(18) label \"CBR\""
+$ns at 3.0 "$node(41) label \"CBR\""
+$ns at 3.0 "$node(3) label \"CBR\""
+$ns at 3.0 "$node(39) label \"CBR\""
+$ns at 4.0 "$node(14) label \"CBR\""
+$ns at 3.0 "$node(1) label \"CBR\""
+$ns at 1.0 "$node(16) label \"CBR\""
+
+
+#Node Movment with Trace Information 
+$ns at 1.0 "$ns trace-annotate \"Node's Move\""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 17 TO 4 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 42 TO 44 \""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 3 TO 32 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 9 TO 36 \""
+$ns at 1.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 39 TO 14 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 10 TO 18 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 41 TO 3 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 33 TO 37 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 28 TO 30 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 1 TO 16 \""
+
+
+#ending nam and the simualtion 
+$ns at $val(stop) "$ns nam-end-wireless $val(stop)"
+$ns at $val(stop) "stop"
+$ns at 100.01 "puts \"end simulation\" ; $ns halt"
+
+proc stop {} {
+
+	global ns tracefd namtrcae
+	$ns flush-trace
+	close $tracefd
+	exit 0
+}
+
+$ns at 0.0 "record"
+
+$ns run
+
+
+Probe Prevention
+# A 50-node example for ad-hoc simulation with AODV
+
+# Define options
+set val(chan)     	Channel/WirelessChannel  	;# channel type
+set val(prop)		Propagation/TwoRayGround	;# radio-propagation model
+set val(netif)		Phy/WirelessPhy			;# network interface type
+set val(mac)		Mac/802_11			;#MAC type
+set val(ifq)		Queue/DropTail/PriQueue		;# interface queue type
+set val(ll)		LL				;# link layer type
+set val(ant)		Antenna/OmniAntenna		;# antenna model
+set val(ifqlen)		50				;# max packet in ifq
+set val(nn)		50				;# number of mobilenodes
+set val(rp)		AODV				;# routing protocol
+set val(x)		800				;# X dimension of topography
+set val(y)		800				;#  dimension of topography
+set val(stop)		100				;# time of simulation end
+
+
+
+set ns [new Simulator]
+
+$ns use-newtrace
+set tracefd	[open probe_p.tr w]
+
+
+
+set namtrace	[open probe_p.nam w]
+$ns namtrace-all-wireless $namtrace $val(x) $val(y)
+$ns trace-all $tracefd
+#define debug values
+
+
+
+# ======================================================================
+# set up the antennas to be centered in the node and 2.5 meters above it
+Antenna/OmniAntenna set X_ 0
+Antenna/OmniAntenna set Y_ 0
+Antenna/OmniAntenna set Z_ 1.5
+Antenna/OmniAntenna set Gt_ 1.0
+Antenna/OmniAntenna set Gr_ 1.0
+# Initialize the SharedMedia interface with parameters to make
+# it work like the 914MHz Lucent WaveLAN DSSS radio interface
+Phy/WirelessPhy set CPThresh_ 20.0	;# receive power threshold
+Phy/WirelessPhy set CSThresh_ 1.559e-11	;# -108.07154db carrier sense thresh
+Phy/WirelessPhy set RXThresh_ 3.652e-10 
+Phy/WirelessPhy set Rb_ 2*1e6
+Phy/WirelessPhy set Pt_ 0.2818      ;# For 250m  transmission range.
+Phy/WirelessPhy set freq_ 914e+6 		;# frequency
+Phy/WirelessPhy set L_ 0.1		;# system loss factor
+Phy/WirelessPhy set Pt_consume_ 0.660  	;# 1.6 W drained power for tx
+Phy/WirelessPhy set Pr_consume_ 0.395 	;# 1.2 W drained power for reception
+Phy/WirelessPhy set P_idle_ 0.035		;# 1.15 W drained power for idle
+set b 1Mb
+
+#=================================================================================
+
+# define color index
+$ns color 0 blue
+$ns color 1 red
+$ns color 2 chocolate
+$ns color 4 brown
+$ns color 5 tan
+$ns color 6 gold
+$ns color 7 black               
+
+#set up topography object
+
+set topo [new Topography]
+
+# define topology
+$topo load_flatgrid $val(x) $val(y)
+
+
+ set god_ [create-god $val(nn)]
+
+
+#Create nn mobilenodes [$val(nn)] and attach them to the channel.
+
+set chan_1 [new $val(chan)]
+
+#cofigure the nodes
+
+$ns node-config  -adhocRouting $val(rp) \
+		-llType $val(ll) \
+		-macType $val(mac)  \
+		-ifqType $val(ifq)  \
+		-ifqLen $val(ifqlen) \
+		-antType $val(ant) \
+		-propType $val(prop) \
+		-phyType $val(netif) \
+		-channelType $val(chan) \
+		-topoInstance $topo \
+		-agentTrace ON \
+		-routerTrace ON \
+		-macTrace OFF \
+		-movemenTrace ON 
+
+
+
+#next-hop information
+$ns compute-routes            
+
+            
+     ## Creating node objects..                
+      for {set i 0} {$i < $val(nn) } { incr i } {
+            set node($i) [$ns node] 
+Mac/802_11 set basicRate_ $b
+Mac/802_11 set dataRate_ $b
+}
+      for {set i 0} {$i < $val(nn) } { incr i } {
+		set link($i) [Mac/802_11 set basicRate_ rand()*100]
+		set capacity_link($i) [Mac/802_11 set dataRate_ rand()*100] 
+		set qlen($i) 50
+		
+      }
+
+for {set i 0} {$i < $val(nn)} {incr i} {
+      $node($i) color darkgreen
+      $ns at 0.0 "$node($i) color darkgreen"
+      }
+## Provide Link Capacity Based data delivery of mobilenodes..
+            
+
+for {set i 0} {$i < $val(nn) } { incr i } {
+		for {set j 0} {$j < $val(nn) } { incr j } {
+		if {$link($i) != $link($j) } {
+			if {$capacity_link($i) > $capacity_link($j) } {
+			link($i);
+			set q_free($i)
+			if (q_free($i) < (qlen($i)/2))	{
+				$ns compute-routes  
+			}
+			else { $node($i) }
+			}
+			else { link($j; }
+		}
+
+}
+}     
+ 			             
+                  
+$node(0) set X_ 500
+$node(0) set Y_ 500
+
+$node(1) set X_ 800
+$node(1) set Y_ 200
+
+$node(2) set X_ 300
+$node(2) set Y_ 400
+
+$node(3) set X_ 700
+$node(3) set Y_ 100
+
+$node(4) set X_ 500
+$node(4) set Y_ 200
+
+$node(5) set X_ 800
+$node(5) set Y_ 800
+
+$node(6) set X_ 600
+$node(6) set Y_ 300
+
+$node(7) set X_ 150
+$node(7) set Y_ 150
+
+$node(8) set X_ 200
+$node(8) set Y_ 150
+
+$node(9) set X_ 100
+$node(9) set Y_ 300
+
+$node(10) set X_ 400
+$node(10) set Y_ 450
+
+$node(11) set X_ 600
+$node(11) set Y_ 350
+
+$node(12) set X_ 550
+$node(12) set Y_ 800
+
+$node(13) set X_ 600
+$node(13) set Y_ 300
+
+$node(14) set X_ 450
+$node(14) set Y_ 600
+
+$node(15) set X_ 250
+$node(15) set Y_ 200
+
+$node(16) set X_ 600
+$node(16) set Y_ 500
+
+$node(17) set X_ 450
+$node(17) set Y_ 400
+
+$node(18) set X_ 650
+$node(18) set Y_ 500
+
+$node(19) set X_ 750
+$node(19) set Y_ 250
+
+$node(20) set X_ 650
+$node(20) set Y_ 800
+
+$node(21) set X_ 250
+$node(21) set Y_ 600
+
+$node(22) set X_ 350
+$node(22) set Y_ 550
+
+$node(23) set X_ 600
+$node(23) set Y_ 600
+
+$node(24) set X_ 300
+$node(24) set Y_ 750
+
+$node(25) set X_ 750
+$node(25) set Y_ 750
+
+$node(26) set X_ 750
+$node(26) set Y_ 100
+
+$node(27) set X_ 100
+$node(27) set Y_ 50
+
+$node(28) set X_ 600
+$node(28) set Y_ 450
+
+$node(29) set X_ 250
+$node(29) set Y_ 450
+
+$node(30) set X_ 800
+$node(30) set Y_ 700
+
+$node(31) set X_ 150
+$node(31) set Y_ 250
+
+$node(32) set X_ 300
+$node(32) set Y_ 300
+
+$node(33) set X_ 150
+$node(33) set Y_ 600
+
+$node(34) set X_ 100
+$node(34) set Y_ 600
+
+$node(35) set X_ 400
+$node(35) set Y_ 200
+
+$node(36) set X_ 200
+$node(36) set Y_ 300
+
+$node(37) set X_ 350
+$node(37) set Y_ 600
+
+$node(38) set X_ 270
+$node(38) set Y_ 100
+
+$node(39) set X_ 380
+$node(39) set Y_ 300
+
+$node(40) set X_ 650
+$node(40) set Y_ 150
+
+$node(41) set X_ 600
+$node(41) set Y_ 250
+
+$node(42) set X_ 400
+$node(42) set Y_ 550
+
+$node(43) set X_ 800
+$node(43) set Y_ 400
+
+$node(44) set X_ 350
+$node(44) set Y_ 150
+
+$node(45) set X_ 680
+$node(45) set Y_ 180
+
+$node(46) set X_ 350
+$node(46) set Y_ 300
+
+$node(47) set X_ 700
+$node(47) set Y_ 400
+
+$node(48) set X_ 300
+$node(48) set Y_ 200
+
+$node(49) set X_ 550
+$node(49) set Y_ 500
+
+
+  
+
+## Define node initial position in nam..
+      for {set i 0} {$i < $val(nn)} { incr i } {
+      # 30 defines the node size for nam..
+            $ns initial_node_pos $node($i) 30
+      }
+
+
+
+
+#Generation of mobile nodes 
+
+$ns at 5.0  "$node(0) setdest 150.0 250.0 15.0"
+$ns at 15.0 "$node(1) setdest 50.0 240.0 3.0"
+$ns at 50.0 "$node(2) setdest 450.0 300.0 28.0"
+$ns at 16.0 "$node(3) setdest 10.0 300.0 14.0"
+$ns at 13.0 "$node(4) setdest 1.0 1.0 4.0"
+$ns at 14.0 "$node(5) setdest 10.0 34.0 13.0"
+$ns at 13.0 "$node(6) setdest 25.0 100.0 6.0"
+$ns at 20.0 "$node(7) setdest 50.0 150.0 10.0"
+$ns at 21.0 "$node(8) setdest 60.0 200.0 8.0"
+$ns at 24.0 "$node(9) setdest 150.0 10.0 10.0"
+$ns at 34.0 "$node(10) setdest 250.0 10.0 10.0"
+$ns at 40.0 "$node(11) setdest 300.0 300.0 2.0"
+$ns at 37.0 "$node(12) setdest 10.0 340.0 3.0"
+$ns at 47.0 "$node(13) setdest 100.0 340.0 5.0"
+$ns at 17.0 "$node(14) setdest 10.0 240.0 10.0"
+$ns at 13.0 "$node(15) setdest 10.0 140.0 3.0"
+$ns at 15.0 "$node(16) setdest 600.0 200.0 5.0"
+$ns at 7.0 "$node(17) setdest 600.0 34.0 30.0"
+$ns at 1.0 "$node(18) setdest 700.0 14.0 12.0"
+$ns at 6.0 "$node(19) setdest 400.0 25.0 6.0"
+$ns at 7.0 "$node(20) setdest 500.0 500.0 8.0"
+$ns at 8.0 "$node(21) setdest 300.0 400.0 3.0"
+$ns at 18.0 "$node(22) setdest 300.0 30.0 11.0"
+$ns at 5.0 "$node(23) setdest 150.0 150.0 1.0"
+$ns at 3.0 "$node(24) setdest 8.0 80.0 21.0"
+$ns at 2.0 "$node(25) setdest 10.0 450.0 20.0"
+$ns at 1.0 "$node(26) setdest 180.0 240.0 25.0"
+$ns at 9.0 "$node(27) setdest 10.0 400.0 14.0"
+$ns at 8.0 "$node(28) setdest 250.0 440.0 23.0"
+$ns at 6.0 "$node(29) setdest 50.0 3.0 15.0"
+$ns at 10.0 "$node(30) setdest 10.0 300.0 15.0"
+$ns at 16.0 "$node(31) setdest 550.0 10.0 1.0"
+$ns at 6.0 "$node(32) setdest 250.0 3.0 5.0"
+$ns at 23.0 "$node(33) setdest 50.0 60.0 8.0"
+$ns at 30.0 "$node(34) setdest 100.0 3.0 25.0"
+$ns at 44.0 "$node(35) setdest 10.0 19.0 10.0"
+$ns at 8.0 "$node(36) setdest 50.0 35.0 1.0"
+$ns at 18.0 "$node(37) setdest 50.0 3.0 6.0"
+$ns at 49.0 "$node(38) setdest 10.0 120.0 20.0"
+$ns at 6.0 "$node(39) setdest 50.0 12.0 15.0"
+$ns at 9.0 "$node(40) setdest 300.0 3.0 7.0"
+$ns at 20.0 "$node(41) setdest 200.0 40.0 5.0"
+$ns at 9.0 "$node(42) setdest 50.0 10.0 25.0"
+$ns at 60.0 "$node(43) setdest 500.0 500.0 2.0"
+$ns at 17.0 "$node(44) setdest 100.0 90.0 14.0"
+$ns at 26.0 "$node(45) setdest 50.0 3.0 5.0"
+$ns at 22.0 "$node(46) setdest 350.0 400.0 10.0"
+$ns at 29.0 "$node(47) setdest 500.0 9.0 3.0"
+$ns at 3.0 "$node(48) setdest 250.0 140.0 15.0"
+$ns at 6.0 "$node(49) setdest 10.0 300.0 19.0"
+
+
+
+#Set a TCP connection between node 17 and node 4
+
+set tcp1 [new Agent/TCP/Newreno]
+$tcp1 set class_ 1
+set sink1 [new Agent/TCPSink]
+$ns attach-agent $node(17) $tcp1
+$ns attach-agent $node(4) $sink1
+$ns connect $tcp1 $sink1
+set ftp1 [new Application/FTP]
+$ftp1 attach-agent $tcp1
+$ns at 5.0 "$ftp1 start"
+$tcp1 set fid_ 2
+$ns at 5.0 " $node(17) color tan" 
+$ns at 5.0 " $node(4) color tan" 
+
+
+
+
+#set a tcp connection between node 42 and node 44
+set tcp2 [new Agent/TCP/Newreno]
+$tcp2 set class_ 1
+set sink11 [new Agent/TCPSink]
+$ns attach-agent $node(42) $tcp2
+$ns attach-agent $node(44) $sink11
+$ns connect $tcp2 $sink11
+set ftp2 [new Application/FTP]
+$ftp2 attach-agent $tcp2
+$ns at 2.0 "$ftp2 start"
+$tcp2 set fid_ 2
+$ns at 2.0 " $node(42) color brown" 
+$ns at 2.0 " $node(44) color brown" 
+
+
+
+#set a tcp connection between node 3 and node 32
+set tcp3 [new Agent/TCP/Newreno]
+$tcp3 set class_ 1
+set sink12 [new Agent/TCPSink]
+$ns attach-agent $node(3) $tcp3
+$ns attach-agent $node(32) $sink12
+$ns connect $tcp3 $sink12
+set ftp3 [new Application/FTP]
+$ftp3 attach-agent $tcp3
+$ns at 4.0 "$ftp3 start"
+$tcp3 set fid_ 2
+$ns at 4.0 " $node(3) color gold" 
+$ns at 4.0 " $node(32) color gold" 
+
+
+
+#set a tcp connection between node 9 and node 36
+set tcp4 [new Agent/TCP/Newreno]
+$tcp4 set class_ 1
+set sink13 [new Agent/TCPSink]
+$ns attach-agent $node(9) $tcp4
+$ns attach-agent $node(36) $sink13
+$ns connect $tcp4 $sink13
+set ftp4 [new Application/FTP]
+$ftp4 attach-agent $tcp4
+$ns at 1.0 "$ftp4 start"
+$tcp4 set fid_ 2
+$ns at 1.0 " $node(9) color gold" 
+$ns at 1.0 " $node(36) color gold" 
+
+
+
+#set a tcp connection between node 39 and node 14
+set tcp5 [new Agent/TCP/Newreno]
+$tcp5 set class_ 1
+set sink14 [new Agent/TCPSink]
+$ns attach-agent $node(39) $tcp5
+$ns attach-agent $node(14) $sink14
+$ns connect $tcp5 $sink14
+set ftp5 [new Application/FTP]
+$ftp5 attach-agent $tcp5
+$ns at 4.0 "$ftp5 start"
+$tcp5 set fid_ 2
+$ns at 4.0 " $node(39) color red" 
+$ns at 4.0 " $node(14) color red" 
+###############
+
+#set a udp connection between node 10 and node 18
+set udp1 [new Agent/UDP]
+
+$ns attach-agent $node(18) $udp1
+
+set sink4 [new Agent/LossMonitor]
+
+$ns attach-agent $node(10) $sink4
+$ns connect $udp1 $sink4
+
+
+$ns at 2.0 " $node(10) color Green" 
+$ns at 2.0 " $node(18) color Green" 
+
+
+#set a udp connection between node 41 and node 3
+set udp2 [new Agent/UDP]
+
+$ns attach-agent $node(41) $udp2
+
+set sink5 [new Agent/LossMonitor]
+
+$ns attach-agent $node(3) $sink5
+$ns connect $udp2 $sink5
+
+$ns at 3.0 " $node(3) color brown" 
+$ns at 3.0 " $node(41) color brown" 
+
+#set a udp connection between node 33 and node 37
+set udp3 [new Agent/UDP]
+
+$ns attach-agent $node(33) $udp3
+
+set sink8 [new Agent/LossMonitor]
+
+$ns attach-agent $node(37) $sink8
+$ns connect $udp3 $sink8
+
+$ns at 5.0 " $node(33) color red" 
+$ns at 5.0 " $node(37) color red" 
+
+
+
+#set a udp connection between node 28 and node 30
+set udp4 [new Agent/UDP]
+
+$ns attach-agent $node(28) $udp4
+
+set sink9 [new Agent/LossMonitor]
+
+$ns attach-agent $node(30) $sink9
+$ns connect $udp4 $sink9
+
+$ns at 1.0 " $node(28) color blue" 
+$ns at 1.0 " $node(30) color blue" 
+
+
+
+#set a udp connection between node 1 and node 16
+set udp5 [new Agent/UDP]
+
+$ns attach-agent $node(1) $udp5
+
+set sink15 [new Agent/LossMonitor]
+
+$ns attach-agent $node(16) $sink15
+$ns connect $udp5 $sink15
+
+$ns at 2.0 " $node(16) color brown" 
+$ns at 2.0 " $node(1) color brown" 
+
+
+proc attach-CBR-traffic { node sink size interval } {
+   #Get an instance of the simulator
+   set ns [Simulator instance]
+   #Create a CBR  agent and attach it to the node
+   set cbr [new Agent/CBR]
+   $ns attach-agent $node $cbr
+   $cbr set packetSize_ $size
+   $cbr set interval_ $interval
+
+   #Attach CBR source to sink;
+   $ns connect $cbr $sink
+   return $cbr
+  }
+
+set cbr1 [attach-CBR-traffic $node(18) $sink4 1000 .45]
+$ns at 2.0 "$cbr1 start"
+set cbr2 [attach-CBR-traffic $node(41) $sink5 1000 .35]
+$ns at 3.0 "$cbr2 start"
+set cbr3 [attach-CBR-traffic $node(33) $sink8 512 .4]
+$ns at 5.0 "$cbr3 start"
+set cbr4 [attach-CBR-traffic $node(47) $sink9 512 .2]
+$ns at 1.0 "$cbr4 start"
+set cbr5 [attach-CBR-traffic $node(45) $sink15 512 .6]
+$ns at 2.0 "$cbr5 start"
+
+
+proc record {} {
+  global  sink4 sink5 sink8 sink9 sink15 f0 f1 f2
+   #Get An Instance Of The Simulator
+   set ns [Simulator instance]
+   
+   #Set The Time After Which The Procedure Should Be Called Again
+   set time 0.05
+   #How Many Bytes Have Been Received By The Traffic Sinks?
+   set bw0 [$sink4 set npkts_]
+   set bw1 [$sink4 set nlost_]  
+   set bw2 [expr $bw0+ $bw1]
+   set bw3 [$sink5 set npkts_]
+   set bw4 [$sink5 set nlost_]  
+   set bw5 [expr $bw3+ $bw4]
+   
+ set bw6 [$sink8 set npkts_]
+   set bw7 [$sink8 set nlost_]  
+   set bw8 [expr $bw6+ $bw7]
+  
+ set bw9 [$sink9 set npkts_]
+   set bw10 [$sink9 set nlost_]  
+   set bw11 [expr $bw9+ $bw10]
+  
+ set bw12 [$sink15 set npkts_]
+   set bw13 [$sink15 set nlost_]  
+   set bw14 [expr $bw12+ $bw13]
+  
+ 
+  
+   #Get The Current Time
+   set now [$ns now]
+   
+    #Re-Schedule The Procedure
+   $ns at [expr $now+$time] "record"
+  }
+
+
+# printing the window size 
+proc plotWindow {tcpSource file} {
+global ns
+set time 0.01
+set now [$ns now]
+
+set cwnd [$tcpSource set cwnd_]
+puts $file "$now $cwnd"
+$ns at [expr $now+$time] "plotWindow $tcpSource $file" }
+
+
+#Telling nodes when the simulation ends
+for {set i 0} {$i < $val(nn)} { incr i } {
+	$ns at $val(stop) "$node($i) reset" ;
+}
+
+
+
+###Probe Attack##########
+
+set ON 1
+set OFF 0
+
+# enable debugging by default
+#set verbose ON
+
+set dos 40
+
+
+set total_host 200000
+
+set probing_port [Application/Worm set ScanPort]
+
+
+
+
+
+# probing packet size
+# slammer Worm UDP packets of 404 Bytes
+set p_size 404
+Application/Worm set ScanPacketSize $p_size
+Agent/MessagePassing set packetSize_ $p_size
+
+#	Application/Worm set ScanRate 1
+
+# 1.config the Normal network
+for {set i 0} {$i < 42} {incr i} {
+    set a($i) [new Agent/MessagePassing]
+    $node($i) attach $a($i) $probing_port
+    set w($i) [new Application/Worm/Dnh]
+    $w($i) attach-agent $a($i)
+    $w($i) addr-range 0 [expr $val(nn)- 2]
+    
+}
+
+
+# 2. set up Attacker node
+set a(42) [new Agent/MessagePassing]
+$node(42) attach $a(42) $probing_port
+set w(42) [new Application/Worm/An]
+$w(42) attach-agent $a(42)
+$w(42) addr-range 42 $total_host
+$w(42) dn-range 0 46
+$w(42) v_percent 0.3
+$w(42) gamma 0
+$w(42) beta 0.3
+
+
+# recv all packets coming in
+set p [$node(42) set dmux_]
+$p defaulttarget $a(42) 
+
+#[$node($an_id) entry] defaulttarget $p
+
+# now starts infection
+$ns at 80.0 "$w(42) start"
+$ns at 85.0 "$w(42) stop"
+
+####END Probe Attack#######
+
+
+###### Prevention#############
+
+if {[set p [$node(42) set dmux_]] <=  0.02 } {
+
+puts "node(42) blocked by prevention"
+
+$w(42) gamma 1.0
+# recv all packets coming in
+set p [$node(42) set dmux_]
+$p defaulttarget $a(42) 
+
+#[$node(42) entry] defaulttarget $p
+}
+
+ 
+#ids module method#######
+for {set i 0} {$i < $val(nn) } { incr i } {
+$ns node-config -adhocRouting idsRPL $node(21)
+		set tr($i) [set idsaodv/idsaodv prevention(tr)]
+		if { $tr($i) <= 0 &&  {[set message  != "AODV"] || [set message  != "TCP"] || [set message  != "UDP"] || [set message  != "cbr"] {[set p [$node(42) set dmux_]] < 0.02}} } {
+		$ns compute-routes
+		
+		} 
+	if { $tr($i) > 0.2 && $tr($i) <= 0.8} {
+		set recv $recvReply
+	} else {
+			set hello [set idsaodv/idsaodv sendHello()]
+		}
+		
+      }
+
+##################### Prevention#############
+
+
+$ns at 1.0 "$node(21) label \"Preventor\""
+
+#start ftp transmission
+$ns at 5.0 "$node(17) label \"FTP\""
+$ns at 5.0 "$node(4) label \"FTP\""
+$ns at 5.0 "$node(42) label \"FTP\""
+$ns at 1.0 "$node(44) label \"FTP\""
+$ns at 4.0 "$node(32) label \"FTP\""
+$ns at 4.0 "$node(3) label \"FTP\""
+$ns at 2.0 "$node(9) label \"FTP\""
+$ns at 4.0 "$node(36) label \"FTP\""
+$ns at 1.0 "$node(39) label \"FTP\""
+$ns at 4.0 "$node(14) label \"FTP\""
+$ns at 2.0 "$node(10) label \"CBR\""
+$ns at 2.0 "$node(18) label \"CBR\""
+$ns at 3.0 "$node(41) label \"CBR\""
+$ns at 3.0 "$node(3) label \"CBR\""
+$ns at 3.0 "$node(39) label \"CBR\""
+$ns at 4.0 "$node(14) label \"CBR\""
+$ns at 3.0 "$node(1) label \"CBR\""
+$ns at 1.0 "$node(16) label \"CBR\""
+
+
+#Node Movment with Trace Information 
+$ns at 1.0 "$ns trace-annotate \"Node's Move\""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 17 TO 4 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 42 TO 44 \""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 3 TO 32 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 9 TO 36 \""
+$ns at 1.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 39 TO 14 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 10 TO 18 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 41 TO 3 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 33 TO 37 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 28 TO 30 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 1 TO 16 \""
+
+
+#ending nam and the simualtion 
+$ns at $val(stop) "$ns nam-end-wireless $val(stop)"
+$ns at $val(stop) "stop"
+$ns at 100.01 "puts \"end simulation\" ; $ns halt"
+
+proc stop {} {
+
+	global ns tracefd namtrcae
+	$ns flush-trace
+	close $tracefd
+	exit 0
+}
+
+$ns at 0.0 "record"
+
+$ns run
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+User to Root Attack Prevention
+# A 50-node example for ad-hoc simulation with AODV
+
+# Define options
+set val(chan)     	Channel/WirelessChannel  	;# channel type
+set val(prop)		Propagation/TwoRayGround	;# radio-propagation model
+set val(netif)		Phy/WirelessPhy			;# network interface type
+set val(mac)		Mac/802_11			;#MAC type
+set val(ifq)		Queue/DropTail/PriQueue		;# interface queue type
+set val(ll)		LL				;# link layer type
+set val(ant)		Antenna/OmniAntenna		;# antenna model
+set val(ifqlen)		50				;# max packet in ifq
+set val(nn)		50				;# number of mobilenodes
+set val(rp)		AODV				;# routing protocol
+set val(x)		800				;# X dimension of topography
+set val(y)		800				;#  dimension of topography
+set val(stop)		100				;# time of simulation end
+
+
+
+
+set ns [new Simulator]
+
+$ns use-newtrace
+set tracefd	[open utrp.tr w]
+
+
+
+set namtrace	[open utrp.nam w]
+$ns namtrace-all-wireless $namtrace $val(x) $val(y)
+$ns trace-all $tracefd
+
+
+
+# ======================================================================
+# set up the antennas to be centered in the node and 2.5 meters above it
+Antenna/OmniAntenna set X_ 0
+Antenna/OmniAntenna set Y_ 0
+Antenna/OmniAntenna set Z_ 1.5
+Antenna/OmniAntenna set Gt_ 1.0
+Antenna/OmniAntenna set Gr_ 1.0
+# Initialize the SharedMedia interface with parameters to make
+# it work like the 914MHz Lucent WaveLAN DSSS radio interface
+Phy/WirelessPhy set CPThresh_ 10.0	;# receive power threshold
+Phy/WirelessPhy set CSThresh_ 1.559e-11	;# -108.07154db carrier sense thresh
+Phy/WirelessPhy set RXThresh_ 3.652e-10 
+Phy/WirelessPhy set Rb_ 2*1e6
+Phy/WirelessPhy set Pt_ 0.2818      ;# For 250m  transmission range.
+Phy/WirelessPhy set freq_ 914e+6 		;# frequency
+Phy/WirelessPhy set L_ 1.0		;# system loss factor
+Phy/WirelessPhy set Pt_consume_ 0.660  	;# 1.6 W drained power for tx
+Phy/WirelessPhy set Pr_consume_ 0.395 	;# 1.2 W drained power for reception
+Phy/WirelessPhy set P_idle_ 0.035		;# 1.15 W drained power for idle
+set j 10
+set prevention idsRPL
+#=================================================================================
+
+# define color index
+$ns color 0 blue
+$ns color 1 red
+$ns color 2 chocolate
+$ns color 4 brown
+$ns color 5 tan
+$ns color 6 gold
+$ns color 7 black               
+
+#set up topography object
+
+set topo [new Topography]
+
+# define topology
+$topo load_flatgrid $val(x) $val(y)
+
+
+ set god_ [create-god $val(nn)]
+
+
+#Create nn mobilenodes [$val(nn)] and attach them to the channel.
+
+set chan_1 [new $val(chan)]
+
+#cofigure the nodes
+
+$ns node-config  -adhocRouting $val(rp) \
+		-llType $val(ll) \
+		-macType $val(mac)  \
+		-ifqType $val(ifq)  \
+		-ifqLen $val(ifqlen) \
+		-antType $val(ant) \
+		-propType $val(prop) \
+		-phyType $val(netif) \
+		-channelType $val(chan) \
+		-topoInstance $topo \
+		-agentTrace ON \
+		-routerTrace ON \
+		-macTrace OFF \
+		-movemenTrace ON 
+
+
+
+#next-hop information
+$ns compute-routes  
+
+
+# Creating mobile nodes for simulation
+
+$ns node-config -adhocRouting AODV
+for { set i 0 } { $i < 10 } { incr i } {
+set node($i) [$ns node]
+$node($i) color black
+}
+
+
+$ns node-config -adhocRouting blackhole \
+		-adhocRouting $prevention 
+set node(10) [$ns node]
+$ns at 0.01 "$node(10) label \"U-to-R\""
+$node(10) color red
+$ns at 0.0 " $node(10) color red" 
+
+###### Prevention#############
+
+for {set j 0} {$j < $val(nn) } { incr j } {
+
+if {[set p [$node(10) set aodv/aodv hseq]] <  [set q [$node($i) set aodv/aodv seq]] && [set pid [$node(10) set aodv/aodv id]] == [set pid [$node($i) set aodv/aodv id]] } {
+
+puts "node(10) blocked by prevention"
+break;
+}
+
+} 
+#ids module method#######
+for {set i 0} {$i < $val(nn) } { incr i } {
+		set tr($i) [set idsaodv/idsaodv prevention(tr)]
+		if { $tr($i) <= 0 &&  {[set message  != "AODV"] || [set message  != "TCP"] || [set message  != "UDP"] || [set message  != "cbr"] {[set p [$node(10) set dmux_]] < 0.02}} } {
+		$ns compute-routes
+		
+		} 
+	if { $tr($i) > 0.2 && $tr($i) <= 0.8} {
+		set recv $recvReply
+	} else {
+			set hello [set idsaodv/idsaodv sendHello()]
+		}
+		
+      }
+
+##################### Prevention#############
+
+$ns node-config -adhocRouting AODV
+for { set i 11 } { $i < 17 } { incr i } {
+set node($i) [$ns node]
+$node($i) color black
+}
+
+$ns node-config -adhocRouting idsRPL         
+set node(17) [$ns node]
+
+$ns node-config -adhocRouting AODV
+for { set i 18 } { $i < 50 } { incr i } {
+set node($i) [$ns node]
+$node($i) color black
+}
+
+## Creating node objects..                
+
+for {set i 0} {$i < $val(nn)} {incr i} {
+      $node($i) color darkgreen
+      $ns at 0.0 "$node($i) color darkgreen"
+      }
+
+## Provide initial location of mobilenodes..
+            
+          
+ 			             
+                  
+$node(0) set X_ 500
+$node(0) set Y_ 500
+
+$node(1) set X_ 800
+$node(1) set Y_ 200
+
+$node(2) set X_ 300
+$node(2) set Y_ 400
+
+$node(3) set X_ 700
+$node(3) set Y_ 100
+
+$node(4) set X_ 500
+$node(4) set Y_ 200
+
+$node(5) set X_ 800
+$node(5) set Y_ 800
+
+$node(6) set X_ 600
+$node(6) set Y_ 300
+
+$node(7) set X_ 150
+$node(7) set Y_ 150
+
+$node(8) set X_ 200
+$node(8) set Y_ 150
+
+$node(9) set X_ 100
+$node(9) set Y_ 300
+
+$node(10) set X_ 400
+$node(10) set Y_ 400
+
+$node(11) set X_ 600
+$node(11) set Y_ 350
+
+$node(12) set X_ 550
+$node(12) set Y_ 800
+
+$node(13) set X_ 600
+$node(13) set Y_ 300
+
+$node(14) set X_ 450
+$node(14) set Y_ 600
+
+$node(15) set X_ 250
+$node(15) set Y_ 200
+
+$node(16) set X_ 600
+$node(16) set Y_ 500
+
+$node(17) set X_ 450
+$node(17) set Y_ 400
+
+$node(18) set X_ 650
+$node(18) set Y_ 500
+
+$node(19) set X_ 750
+$node(19) set Y_ 250
+
+$node(20) set X_ 650
+$node(20) set Y_ 800
+
+$node(21) set X_ 250
+$node(21) set Y_ 600
+
+$node(22) set X_ 350
+$node(22) set Y_ 550
+
+$node(23) set X_ 600
+$node(23) set Y_ 600
+
+$node(24) set X_ 300
+$node(24) set Y_ 750
+
+$node(25) set X_ 750
+$node(25) set Y_ 750
+
+$node(26) set X_ 750
+$node(26) set Y_ 100
+
+$node(27) set X_ 100
+$node(27) set Y_ 50
+
+$node(28) set X_ 600
+$node(28) set Y_ 450
+
+$node(29) set X_ 250
+$node(29) set Y_ 450
+
+$node(30) set X_ 800
+$node(30) set Y_ 700
+
+$node(31) set X_ 150
+$node(31) set Y_ 250
+
+$node(32) set X_ 300
+$node(32) set Y_ 300
+
+$node(33) set X_ 150
+$node(33) set Y_ 600
+
+$node(34) set X_ 100
+$node(34) set Y_ 600
+
+$node(35) set X_ 400
+$node(35) set Y_ 200
+
+$node(36) set X_ 200
+$node(36) set Y_ 300
+
+$node(37) set X_ 350
+$node(37) set Y_ 600
+
+$node(38) set X_ 270
+$node(38) set Y_ 100
+
+$node(39) set X_ 380
+$node(39) set Y_ 300
+
+$node(40) set X_ 650
+$node(40) set Y_ 150
+
+$node(41) set X_ 600
+$node(41) set Y_ 250
+
+$node(42) set X_ 400
+$node(42) set Y_ 550
+
+$node(43) set X_ 800
+$node(43) set Y_ 400
+
+$node(44) set X_ 350
+$node(44) set Y_ 150
+
+$node(45) set X_ 680
+$node(45) set Y_ 180
+
+$node(46) set X_ 350
+$node(46) set Y_ 300
+
+$node(47) set X_ 700
+$node(47) set Y_ 400
+
+$node(48) set X_ 300
+$node(48) set Y_ 200
+
+$node(49) set X_ 550
+$node(49) set Y_ 500
+
+
+  
+
+## Define node initial position in nam..
+      for {set i 0} {$i < $val(nn)} { incr i } {
+      # 30 defines the node size for nam..
+            $ns initial_node_pos $node($i) 30
+      }
+
+
+
+
+#Generation of mobile nodes 
+
+$ns at 5.0  "$node(0) setdest 150.0 250.0 15.0"
+$ns at 15.0 "$node(1) setdest 50.0 240.0 3.0"
+$ns at 50.0 "$node(2) setdest 450.0 300.0 28.0"
+$ns at 16.0 "$node(3) setdest 10.0 300.0 14.0"
+$ns at 13.0 "$node(4) setdest 1.0 1.0 4.0"
+$ns at 14.0 "$node(5) setdest 10.0 34.0 13.0"
+$ns at 13.0 "$node(6) setdest 25.0 100.0 6.0"
+$ns at 20.0 "$node(7) setdest 50.0 150.0 10.0"
+$ns at 21.0 "$node(8) setdest 60.0 200.0 8.0"
+$ns at 24.0 "$node(9) setdest 150.0 10.0 10.0"
+$ns at 34.0 "$node(10) setdest 250.0 10.0 10.0"
+$ns at 40.0 "$node(11) setdest 300.0 300.0 2.0"
+$ns at 37.0 "$node(12) setdest 10.0 340.0 3.0"
+$ns at 47.0 "$node(13) setdest 100.0 340.0 5.0"
+$ns at 17.0 "$node(14) setdest 10.0 240.0 10.0"
+$ns at 13.0 "$node(15) setdest 10.0 140.0 3.0"
+$ns at 15.0 "$node(16) setdest 600.0 200.0 5.0"
+$ns at 7.0 "$node(17) setdest 600.0 34.0 30.0"
+$ns at 1.0 "$node(18) setdest 700.0 14.0 12.0"
+$ns at 6.0 "$node(19) setdest 400.0 25.0 6.0"
+$ns at 7.0 "$node(20) setdest 500.0 500.0 8.0"
+$ns at 8.0 "$node(21) setdest 300.0 400.0 3.0"
+$ns at 18.0 "$node(22) setdest 300.0 30.0 11.0"
+$ns at 5.0 "$node(23) setdest 150.0 150.0 1.0"
+$ns at 3.0 "$node(24) setdest 8.0 80.0 21.0"
+$ns at 2.0 "$node(25) setdest 10.0 450.0 20.0"
+$ns at 1.0 "$node(26) setdest 180.0 240.0 25.0"
+$ns at 9.0 "$node(27) setdest 10.0 400.0 14.0"
+$ns at 8.0 "$node(28) setdest 250.0 440.0 23.0"
+$ns at 6.0 "$node(29) setdest 50.0 3.0 15.0"
+$ns at 10.0 "$node(30) setdest 10.0 300.0 15.0"
+$ns at 16.0 "$node(31) setdest 550.0 10.0 1.0"
+$ns at 6.0 "$node(32) setdest 250.0 3.0 5.0"
+$ns at 23.0 "$node(33) setdest 50.0 60.0 8.0"
+$ns at 30.0 "$node(34) setdest 100.0 3.0 25.0"
+$ns at 44.0 "$node(35) setdest 10.0 19.0 10.0"
+$ns at 8.0 "$node(36) setdest 50.0 35.0 1.0"
+$ns at 18.0 "$node(37) setdest 50.0 3.0 6.0"
+$ns at 49.0 "$node(38) setdest 10.0 120.0 20.0"
+$ns at 6.0 "$node(39) setdest 50.0 12.0 15.0"
+$ns at 9.0 "$node(40) setdest 300.0 3.0 7.0"
+$ns at 20.0 "$node(41) setdest 200.0 40.0 5.0"
+$ns at 9.0 "$node(42) setdest 50.0 10.0 25.0"
+$ns at 60.0 "$node(43) setdest 500.0 500.0 2.0"
+$ns at 17.0 "$node(44) setdest 100.0 90.0 14.0"
+$ns at 26.0 "$node(45) setdest 50.0 3.0 5.0"
+$ns at 22.0 "$node(46) setdest 350.0 400.0 10.0"
+$ns at 29.0 "$node(47) setdest 500.0 9.0 3.0"
+$ns at 3.0 "$node(48) setdest 250.0 140.0 15.0"
+$ns at 6.0 "$node(49) setdest 10.0 300.0 19.0"
+
+
+
+#Set a TCP connection between node 17 and node 4
+
+set tcp1 [new Agent/TCP/Newreno]
+$tcp1 set class_ 1
+set sink1 [new Agent/TCPSink]
+$ns attach-agent $node(17) $tcp1
+$ns attach-agent $node(4) $sink1
+$ns connect $tcp1 $sink1
+set ftp1 [new Application/FTP]
+$ftp1 attach-agent $tcp1
+$ns at 5.0 "$ftp1 start"
+$tcp1 set fid_ 2
+$ns at 5.0 " $node(17) color tan" 
+$ns at 5.0 " $node(4) color tan" 
+
+
+
+
+#set a tcp connection between node 42 and node 44
+set tcp2 [new Agent/TCP/Newreno]
+$tcp2 set class_ 1
+set sink11 [new Agent/TCPSink]
+$ns attach-agent $node(42) $tcp2
+$ns attach-agent $node(44) $sink11
+$ns connect $tcp2 $sink11
+set ftp2 [new Application/FTP]
+$ftp2 attach-agent $tcp2
+$ns at 2.0 "$ftp2 start"
+$tcp2 set fid_ 2
+$ns at 2.0 " $node(42) color brown" 
+$ns at 2.0 " $node(44) color brown" 
+
+
+
+#set a tcp connection between node 3 and node 32
+set tcp3 [new Agent/TCP/Newreno]
+$tcp3 set class_ 1
+set sink12 [new Agent/TCPSink]
+$ns attach-agent $node(3) $tcp3
+$ns attach-agent $node(32) $sink12
+$ns connect $tcp3 $sink12
+set ftp3 [new Application/FTP]
+$ftp3 attach-agent $tcp3
+$ns at 4.0 "$ftp3 start"
+$tcp3 set fid_ 2
+$ns at 4.0 " $node(3) color gold" 
+$ns at 4.0 " $node(32) color gold" 
+
+
+
+#set a tcp connection between node 9 and node 36
+set tcp4 [new Agent/TCP/Newreno]
+$tcp4 set class_ 1
+set sink13 [new Agent/TCPSink]
+$ns attach-agent $node(9) $tcp4
+$ns attach-agent $node(36) $sink13
+$ns connect $tcp4 $sink13
+set ftp4 [new Application/FTP]
+$ftp4 attach-agent $tcp4
+$ns at 1.0 "$ftp4 start"
+$tcp4 set fid_ 2
+$ns at 1.0 " $node(9) color gold" 
+$ns at 1.0 " $node(36) color gold" 
+
+
+
+#set a tcp connection between node 39 and node 14
+set tcp5 [new Agent/TCP/Newreno]
+$tcp5 set class_ 1
+set sink14 [new Agent/TCPSink]
+$ns attach-agent $node(39) $tcp5
+$ns attach-agent $node(14) $sink14
+$ns connect $tcp5 $sink14
+set ftp5 [new Application/FTP]
+$ftp5 attach-agent $tcp5
+$ns at 4.0 "$ftp5 start"
+$tcp5 set fid_ 2
+$ns at 4.0 " $node(39) color red" 
+$ns at 4.0 " $node(14) color red" 
+###############
+
+#set a udp connection between node 10 and node 18
+set udp1 [new Agent/UDP]
+
+$ns attach-agent $node(18) $udp1
+
+set sink4 [new Agent/LossMonitor]
+
+$ns attach-agent $node(10) $sink4
+$ns connect $udp1 $sink4
+
+
+$ns at 2.0 " $node(10) color Green" 
+$ns at 2.0 " $node(18) color Green" 
+
+
+#set a udp connection between node 41 and node 3
+set udp2 [new Agent/UDP]
+
+$ns attach-agent $node(41) $udp2
+
+set sink5 [new Agent/LossMonitor]
+
+$ns attach-agent $node(3) $sink5
+$ns connect $udp2 $sink5
+
+$ns at 3.0 " $node(3) color brown" 
+$ns at 3.0 " $node(41) color brown" 
+
+#set a udp connection between node 33 and node 37
+set udp3 [new Agent/UDP]
+
+$ns attach-agent $node(33) $udp3
+
+set sink8 [new Agent/LossMonitor]
+
+$ns attach-agent $node(37) $sink8
+$ns connect $udp3 $sink8
+
+$ns at 5.0 " $node(33) color red" 
+$ns at 5.0 " $node(37) color red" 
+
+
+
+#set a udp connection between node 28 and node 30
+set udp4 [new Agent/UDP]
+
+$ns attach-agent $node(28) $udp4
+
+set sink9 [new Agent/LossMonitor]
+
+$ns attach-agent $node(30) $sink9
+$ns connect $udp4 $sink9
+
+$ns at 1.0 " $node(28) color blue" 
+$ns at 1.0 " $node(30) color blue" 
+
+
+
+#set a udp connection between node 1 and node 16
+set udp5 [new Agent/UDP]
+
+$ns attach-agent $node(1) $udp5
+
+set sink15 [new Agent/LossMonitor]
+
+$ns attach-agent $node(16) $sink15
+$ns connect $udp5 $sink15
+
+$ns at 2.0 " $node(16) color brown" 
+$ns at 2.0 " $node(1) color brown" 
+
+
+proc attach-CBR-traffic { node sink size interval } {
+   #Get an instance of the simulator
+   set ns [Simulator instance]
+   #Create a CBR  agent and attach it to the node
+   set cbr [new Agent/CBR]
+   $ns attach-agent $node $cbr
+   $cbr set packetSize_ $size
+   $cbr set interval_ $interval
+
+   #Attach CBR source to sink;
+   $ns connect $cbr $sink
+   return $cbr
+  }
+
+set cbr1 [attach-CBR-traffic $node(18) $sink4 1000 .45]
+$ns at 2.0 "$cbr1 start"
+set cbr2 [attach-CBR-traffic $node(41) $sink5 1000 .35]
+$ns at 3.0 "$cbr2 start"
+set cbr3 [attach-CBR-traffic $node(33) $sink8 512 .4]
+$ns at 5.0 "$cbr3 start"
+set cbr4 [attach-CBR-traffic $node(47) $sink9 512 .2]
+$ns at 1.0 "$cbr4 start"
+set cbr5 [attach-CBR-traffic $node(45) $sink15 512 .6]
+$ns at 2.0 "$cbr5 start"
+
+
+proc record {} {
+  global  sink4 sink5 sink8 sink9 sink15 f0 f1 f2
+   #Get An Instance Of The Simulator
+   set ns [Simulator instance]
+   
+   #Set The Time After Which The Procedure Should Be Called Again
+   set time 0.05
+   #How Many Bytes Have Been Received By The Traffic Sinks?
+   set bw0 [$sink4 set npkts_]
+   set bw1 [$sink4 set nlost_]  
+   set bw2 [expr $bw0+ $bw1]
+   set bw3 [$sink5 set npkts_]
+   set bw4 [$sink5 set nlost_]  
+   set bw5 [expr $bw3+ $bw4]
+   
+ set bw6 [$sink8 set npkts_]
+   set bw7 [$sink8 set nlost_]  
+   set bw8 [expr $bw6+ $bw7]
+  
+ set bw9 [$sink9 set npkts_]
+   set bw10 [$sink9 set nlost_]  
+   set bw11 [expr $bw9+ $bw10]
+  
+ set bw12 [$sink15 set npkts_]
+   set bw13 [$sink15 set nlost_]  
+   set bw14 [expr $bw12+ $bw13]
+  
+ 
+  
+   #Get The Current Time
+   set now [$ns now]
+   
+    #Re-Schedule The Procedure
+   $ns at [expr $now+$time] "record"
+  }
+
+
+# printing the window size 
+proc plotWindow {tcpSource file} {
+global ns
+set time 0.01
+set now [$ns now]
+
+set cwnd [$tcpSource set cwnd_]
+puts $file "$now $cwnd"
+$ns at [expr $now+$time] "plotWindow $tcpSource $file" }
+
+
+#Telling nodes when the simulation ends
+for {set i 0} {$i < $val(nn)} { incr i } {
+	$ns at $val(stop) "$node($i) reset" ;
+}
+
+
+
+#start ftp transmission
+$ns at 5.0 "$node(17) label \"FTP\""
+$ns at 5.0 "$node(4) label \"FTP\""
+$ns at 5.0 "$node(42) label \"FTP\""
+$ns at 1.0 "$node(44) label \"FTP\""
+$ns at 4.0 "$node(32) label \"FTP\""
+$ns at 4.0 "$node(3) label \"FTP\""
+$ns at 2.0 "$node(9) label \"FTP\""
+$ns at 4.0 "$node(36) label \"FTP\""
+$ns at 1.0 "$node(39) label \"FTP\""
+$ns at 4.0 "$node(14) label \"FTP\""
+$ns at 2.0 "$node(10) label \"CBR\""
+$ns at 2.0 "$node(18) label \"CBR\""
+$ns at 3.0 "$node(41) label \"CBR\""
+$ns at 3.0 "$node(3) label \"CBR\""
+$ns at 3.0 "$node(39) label \"CBR\""
+$ns at 4.0 "$node(14) label \"CBR\""
+$ns at 3.0 "$node(1) label \"CBR\""
+$ns at 1.0 "$node(16) label \"CBR\""
+$ns at 0.1 "$node(17) label \"Preventer\""
+
+#Node Movment with Trace Information 
+$ns at 1.0 "$ns trace-annotate \"Node's Move\""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 17 TO 4 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 42 TO 44 \""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 3 TO 32 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 9 TO 36 \""
+$ns at 1.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 39 TO 14 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 10 TO 18 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 41 TO 3 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 33 TO 37 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 28 TO 30 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 1 TO 16 \""
+
+
+#ending nam and the simualtion 
+$ns at $val(stop) "$ns nam-end-wireless $val(stop)"
+$ns at $val(stop) "stop"
+$ns at 100.01 "puts \"end simulation\" ; $ns halt"
+
+proc stop {} {
+
+	global ns tracefd namtrcae
+	$ns flush-trace
+	close $tracefd
+	exit 0
+}
+
+$ns at 0.0 "record"
+
+$ns run
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Vampire Prevention
+# A 50-node example for ad-hoc simulation with EAODV
+
+# Define options
+set val(chan)     	Channel/WirelessChannel  	;# channel type
+set val(prop)		Propagation/TwoRayGround	;# radio-propagation model
+set val(netif)		Phy/WirelessPhy			;# network interface type
+set val(mac)		Mac/802_11			;#MAC type
+set val(ifq)		Queue/DropTail/PriQueue		;# interface queue type
+set val(ll)		LL				;# link layer type
+set val(ant)		Antenna/OmniAntenna		;# antenna model
+set val(ifqlen)		50				;# max packet in ifq
+set val(nn)		50				;# number of mobilenodes
+set val(rp)		AODV				;# routing protocol
+set val(x)		800				;# X dimension of topography
+set val(y)		800				;#  dimension of topography
+set val(stop)		100				;# time of simulation end
+
+
+set ns [new Simulator]
+
+$ns use-newtrace
+set tracefd	[open Vampirep.tr w]
+
+
+set namtrace	[open Vampirep.nam w]
+$ns namtrace-all-wireless $namtrace $val(x) $val(y)
+$ns trace-all $tracefd
+
+
+
+# define color index
+$ns color 0 blue
+$ns color 1 red
+$ns color 2 chocolate
+$ns color 4 brown
+$ns color 5 tan
+$ns color 6 gold
+$ns color 7 black               
+
+#set up topography object
+
+set topo [new Topography]
+
+# define topology
+$topo load_flatgrid $val(x) $val(y)
+
+
+ set god_ [create-god $val(nn)]
+
+# Initialize the SharedMedia interface with parameters to make it work like the 914MHz 
+# Lucent WaveLAN DSSS radio interface
+
+Phy/WirelessPhy set CPThresh_ 10.0		;# receive power threshold
+Phy/WirelessPhy set CSThresh_ 1.559e-11	;# -108.07154db carrier sense thresh
+Phy/WirelessPhy set RXThresh_ 3.652e-10	;# -94.374692db receive power thresh
+Phy/WirelessPhy set Rb_ 	2*1e6
+Phy/WirelessPhy set Pt_ 	0.2820	;# For 500m transmission range.
+Phy/WirelessPhy set freq_ 	914e+6 	;# frequency
+Phy/WirelessPhy set L_ 	0.2			;# system loss factor
+Phy/WirelessPhy set Pt_consume_ 0.660  	;# 1.6 W drained power for tx
+Phy/WirelessPhy set Pr_consume_ 0.395 	;# 1.2 W drained power for reception
+Phy/WirelessPhy set P_idle_ 0.035		;# 1.15 W drained power for idle
+
+#Create nn mobilenodes [$val(nn)] and attach them to the channel.
+
+set chan_1 [new $val(chan)]
+
+#cofigure the nodes
+
+$ns node-config  -adhocRouting $val(rp) \
+		-llType $val(ll) \
+		-macType $val(mac)  \
+		-ifqType $val(ifq)  \
+		-ifqLen $val(ifqlen) \
+		-antType $val(ant) \
+		-propType $val(prop) \
+		-phyType $val(netif) \
+		-channelType $val(chan) \
+		-topoInstance $topo \
+		-agentTrace ON \
+		-routerTrace ON \
+		-macTrace OFF \
+		-movemenTrace ON 
+
+
+# Energy model
+      $ns node-config  -energyModel EnergyModel \
+                        -txPower 1.5 \
+                        -rxPower 1.0 \
+                        -idlePower 0.0 \
+                        -sensePower 0.0175 
+
+#next-hop information
+$ns compute-routes            
+
+
+
+## Provide initial location of mobilenodes..
+            
+         
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 90 \
+
+set node(0) [$ns node]                  
+$node(0) set X_ 400
+$node(0) set Y_ 400
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 6 \
+
+set node(1) [$ns node]                  
+$node(1) set X_ 150
+$node(1) set Y_ 200
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 81 \
+
+set node(2) [$ns node]                  
+$node(2) set X_ 300
+$node(2) set Y_ 400
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 8 \
+
+set node(3) [$ns node]                  
+$node(3) set X_ 700
+$node(3) set Y_ 130
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 4 \
+
+set node(4) [$ns node]                  
+$node(4) set X_ 200
+$node(4) set Y_ 300
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 9 \
+
+set node(5) [$ns node]                  
+$node(5) set X_ 800
+$node(5) set Y_ 600
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 79 \
+
+set node(6) [$ns node]                  
+$node(6) set X_ 600
+$node(6) set Y_ 390
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 78 \
+
+set node(7) [$ns node]                  
+$node(7) set X_ 150
+$node(7) set Y_ 150
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 80 \
+
+set node(8) [$ns node]                  
+$node(8) set X_ 200
+$node(8) set Y_ 150
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 91 \
+
+set node(9) [$ns node]                  
+$node(9) set X_ 100
+$node(9) set Y_ 300
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 81 \
+
+set node(10) [$ns node]                  
+$node(10) set X_ 400
+$node(10) set Y_ 550
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 51 \
+
+set node(11) [$ns node]                  
+$node(11) set X_ 600
+$node(11) set Y_ 350
+
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 67 \
+
+set node(12) [$ns node]                  
+$node(12) set X_ 550
+$node(12) set Y_ 300
+
+
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 76 \
+
+set node(13) [$ns node]                  
+$node(13) set X_ 700
+$node(13) set Y_ 300
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 86 \
+
+set node(14) [$ns node]                  
+$node(14) set X_ 450
+$node(14) set Y_ 600
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 86 \
+
+set node(15) [$ns node]                  
+$node(15) set X_ 250
+$node(15) set Y_ 200
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 100 \
+
+set node(16) [$ns node]                  
+$node(16) set X_ 600
+$node(16) set Y_ 500
+
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 80 \
+
+set node(17) [$ns node]                  
+$node(17) set X_ 450
+$node(17) set Y_ 400
+
+
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 92 \
+
+set node(18) [$ns node]                  
+$node(18) set X_ 650
+$node(18) set Y_ 500
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 67 \
+
+set node(19) [$ns node]                  
+$node(19) set X_ 750
+$node(19) set Y_ 150
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 78 \
+
+set node(20) [$ns node]                  
+$node(20) set X_ 750
+$node(20) set Y_ 400
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 72 \
+
+set node(21) [$ns node]                  
+$node(21) set X_ 350
+$node(21) set Y_ 600
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 71 \
+
+set node(22) [$ns node]                  
+$node(22) set X_ 350
+$node(22) set Y_ 550
+
+ $ns node-config  -energyModel EnergyModel \
+-initialEnergy 60 \
+
+set node(23) [$ns node]                  
+$node(23) set X_ 600
+$node(23) set Y_ 600
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 96 \
+
+set node(24) [$ns node]                  
+$node(24) set X_ 300
+$node(24) set Y_ 350
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 25 \
+
+set node(25) [$ns node]                  
+$node(25) set X_ 750
+$node(25) set Y_ 250
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 52 \
+
+set node(26) [$ns node]                  
+$node(26) set X_ 750
+$node(26) set Y_ 150
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 67 \
+
+set node(27) [$ns node]                  
+$node(27) set X_ 100
+$node(27) set Y_ 50
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 57 \
+
+set node(28) [$ns node]                  
+$node(28) set X_ 600
+$node(28) set Y_ 450
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 87 \
+
+set node(29) [$ns node]                  
+$node(29) set X_ 250
+$node(29) set Y_ 450
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 77 \
+
+set node(30) [$ns node]                  
+$node(30) set X_ 800
+$node(30) set Y_ 300
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 58 \
+
+set node(31) [$ns node]                  
+$node(31) set X_ 150
+$node(31) set Y_ 250
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 89 \
+
+set node(32) [$ns node]                  
+$node(32) set X_ 300
+$node(32) set Y_ 300
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 90 \
+
+set node(33) [$ns node]                  
+$node(33) set X_ 400
+$node(33) set Y_ 250
+
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 24 \
+
+set node(34) [$ns node]                  
+$node(34) set X_ 350
+$node(34) set Y_ 150
+
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 6 \
+
+set node(35) [$ns node]                  
+$node(35) set X_ 680
+$node(35) set Y_ 180
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 50 \
+
+set node(36) [$ns node]                  
+$node(36) set X_ 350
+$node(36) set Y_ 300
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 70 \
+
+set node(37) [$ns node]                  
+$node(37) set X_ 700
+$node(37) set Y_ 400
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 80 \
+
+set node(38) [$ns node]                  
+$node(38) set X_ 300
+$node(38) set Y_ 200
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 55 \
+
+set node(39) [$ns node]                  
+$node(39) set X_ 550
+$node(39) set Y_ 500
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 83 \
+
+set node(40) [$ns node]                  
+$node(40) set X_ 800
+$node(40) set Y_ 600
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 93 \
+
+set node(41) [$ns node]                  
+$node(41) set X_ 50
+$node(41) set Y_ 350
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 98 \
+
+set node(42) [$ns node]                  
+$node(42) set X_ 400
+$node(42) set Y_ 300
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 80 \
+
+set node(43) [$ns node]                  
+$node(43) set X_ 300
+$node(43) set Y_ 650
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 64 \
+
+set node(44) [$ns node]                  
+$node(44) set X_ 450
+$node(44) set Y_ 444
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 73 \
+
+set node(45) [$ns node]                  
+$node(45) set X_ 80
+$node(45) set Y_ 680
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 67 \
+
+set node(46) [$ns node]                  
+$node(46) set X_ 750
+$node(46) set Y_ 700
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 23 \
+
+set node(47) [$ns node]                  
+$node(47) set X_ 700
+$node(47) set Y_ 400
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 82 \
+
+set node(48) [$ns node]                  
+$node(48) set X_ 400
+$node(48) set Y_ 678
+
+$ns node-config  -energyModel EnergyModel \
+-initialEnergy 45 \
+
+set node(49) [$ns node]                  
+$node(49) set X_ 750
+$node(49) set Y_ 750
+
+
+
+#Generation of mobile nodes 
+
+$ns at 5.0  "$node(0) setdest 150.0 250.0 15.0"
+$ns at 15.0 "$node(1) setdest 50.0 240.0 3.0"
+$ns at 50.0 "$node(2) setdest 450.0 300.0 28.0"
+$ns at 16.0 "$node(3) setdest 10.0 300.0 14.0"
+$ns at 13.0 "$node(4) setdest 1.0 1.0 4.0"
+$ns at 14.0 "$node(5) setdest 10.0 34.0 13.0"
+$ns at 13.0 "$node(6) setdest 25.0 100.0 6.0"
+$ns at 20.0 "$node(7) setdest 50.0 150.0 10.0"
+$ns at 21.0 "$node(8) setdest 60.0 200.0 8.0"
+$ns at 24.0 "$node(9) setdest 150.0 10.0 10.0"
+$ns at 34.0 "$node(10) setdest 250.0 10.0 10.0"
+$ns at 40.0 "$node(11) setdest 300.0 300.0 2.0"
+$ns at 37.0 "$node(12) setdest 10.0 340.0 3.0"
+$ns at 47.0 "$node(13) setdest 100.0 340.0 5.0"
+$ns at 17.0 "$node(14) setdest 10.0 240.0 10.0"
+$ns at 13.0 "$node(15) setdest 10.0 140.0 3.0"
+$ns at 15.0 "$node(16) setdest 600.0 200.0 5.0"
+$ns at 7.0 "$node(17) setdest 600.0 34.0 30.0"
+$ns at 1.0 "$node(18) setdest 700.0 14.0 12.0"
+$ns at 6.0 "$node(19) setdest 400.0 25.0 6.0"
+$ns at 7.0 "$node(20) setdest 500.0 500.0 8.0"
+$ns at 8.0 "$node(21) setdest 300.0 400.0 3.0"
+$ns at 18.0 "$node(22) setdest 300.0 30.0 11.0"
+$ns at 5.0 "$node(23) setdest 150.0 150.0 1.0"
+$ns at 3.0 "$node(24) setdest 8.0 80.0 21.0"
+$ns at 2.0 "$node(25) setdest 10.0 450.0 20.0"
+$ns at 1.0 "$node(26) setdest 180.0 240.0 25.0"
+$ns at 9.0 "$node(27) setdest 10.0 400.0 14.0"
+$ns at 8.0 "$node(28) setdest 250.0 440.0 23.0"
+$ns at 6.0 "$node(29) setdest 50.0 3.0 15.0"
+$ns at 10.0 "$node(30) setdest 10.0 300.0 15.0"
+$ns at 16.0 "$node(31) setdest 550.0 10.0 1.0"
+$ns at 6.0 "$node(32) setdest 250.0 3.0 5.0"
+$ns at 23.0 "$node(33) setdest 50.0 60.0 8.0"
+$ns at 30.0 "$node(34) setdest 100.0 3.0 25.0"
+$ns at 44.0 "$node(35) setdest 10.0 19.0 10.0"
+$ns at 8.0 "$node(36) setdest 50.0 35.0 1.0"
+$ns at 18.0 "$node(37) setdest 50.0 3.0 6.0"
+$ns at 49.0 "$node(38) setdest 10.0 120.0 20.0"
+$ns at 6.0 "$node(39) setdest 50.0 12.0 15.0"
+$ns at 9.0 "$node(40) setdest 300.0 3.0 7.0"
+$ns at 20.0 "$node(41) setdest 200.0 40.0 5.0"
+$ns at 9.0 "$node(42) setdest 50.0 10.0 25.0"
+$ns at 60.0 "$node(43) setdest 500.0 500.0 2.0"
+$ns at 17.0 "$node(44) setdest 100.0 90.0 14.0"
+$ns at 26.0 "$node(45) setdest 50.0 3.0 5.0"
+$ns at 22.0 "$node(46) setdest 350.0 400.0 10.0"
+$ns at 29.0 "$node(47) setdest 500.0 9.0 3.0"
+$ns at 3.0 "$node(48) setdest 250.0 140.0 15.0"
+$ns at 6.0 "$node(49) setdest 10.0 300.0 19.0"
+
+
+for {set i 0} {$i < $val(nn)} {incr i} {
+      $node($i) color black
+      $ns at 0.0 "$node($i) color black"
+      }
+
+## Define node initial position in nam..
+      for {set i 0} {$i < $val(nn)} { incr i } {
+      # 30 defines the node size for nam..
+            $ns initial_node_pos $node($i) 30
+      }
+
+#Set a TCP connection between node 17 and node 4
+
+set tcp1 [new Agent/TCP/Newreno]
+$tcp1 set class_ 1
+set sink1 [new Agent/TCPSink]
+$ns attach-agent $node(17) $tcp1
+$ns attach-agent $node(4) $sink1
+$ns connect $tcp1 $sink1
+set ftp1 [new Application/FTP]
+$ftp1 attach-agent $tcp1
+$ns at 5.0 "$ftp1 start"
+$tcp1 set fid_ 2
+$ns at 5.0 " $node(17) color tan" 
+$ns at 5.0 " $node(4) color tan" 
+
+
+
+
+#set a tcp connection between node 42 and node 44
+set tcp2 [new Agent/TCP/Newreno]
+$tcp2 set class_ 1
+set sink11 [new Agent/TCPSink]
+$ns attach-agent $node(42) $tcp2
+$ns attach-agent $node(44) $sink11
+$ns connect $tcp2 $sink11
+set ftp2 [new Application/FTP]
+$ftp2 attach-agent $tcp2
+$ns at 2.0 "$ftp2 start"
+$tcp2 set fid_ 2
+$ns at 2.0 " $node(42) color brown" 
+$ns at 2.0 " $node(44) color brown" 
+
+
+
+#set a tcp connection between node 3 and node 32
+set tcp3 [new Agent/TCP/Newreno]
+$tcp3 set class_ 1
+set sink12 [new Agent/TCPSink]
+$ns attach-agent $node(3) $tcp3
+$ns attach-agent $node(32) $sink12
+$ns connect $tcp3 $sink12
+set ftp3 [new Application/FTP]
+$ftp3 attach-agent $tcp3
+$ns at 4.0 "$ftp3 start"
+$tcp3 set fid_ 2
+$ns at 4.0 " $node(3) color gold" 
+$ns at 4.0 " $node(32) color gold" 
+
+
+
+#set a tcp connection between node 9 and node 36
+set tcp4 [new Agent/TCP/Newreno]
+$tcp4 set class_ 1
+set sink13 [new Agent/TCPSink]
+$ns attach-agent $node(9) $tcp4
+$ns attach-agent $node(36) $sink13
+$ns connect $tcp4 $sink13
+set ftp4 [new Application/FTP]
+$ftp4 attach-agent $tcp4
+$ns at 1.0 "$ftp4 start"
+$tcp4 set fid_ 2
+$ns at 1.0 " $node(9) color gold" 
+$ns at 1.0 " $node(36) color gold" 
+
+
+
+#set a tcp connection between node 39 and node 14
+set tcp5 [new Agent/TCP/Newreno]
+$tcp5 set class_ 1
+set sink14 [new Agent/TCPSink]
+$ns attach-agent $node(39) $tcp5
+$ns attach-agent $node(14) $sink14
+$ns connect $tcp5 $sink14
+set ftp5 [new Application/FTP]
+$ftp5 attach-agent $tcp5
+$ns at 4.0 "$ftp5 start"
+$tcp5 set fid_ 2
+$ns at 4.0 " $node(39) color red" 
+$ns at 4.0 " $node(14) color red" 
+###############
+
+#set a udp connection between node 10 and node 18
+set udp1 [new Agent/UDP]
+
+$ns attach-agent $node(18) $udp1
+
+set sink4 [new Agent/LossMonitor]
+
+$ns attach-agent $node(10) $sink4
+$ns connect $udp1 $sink4
+
+
+$ns at 2.0 " $node(10) color Green" 
+$ns at 2.0 " $node(18) color Green" 
+
+
+#set a udp connection between node 41 and node 3
+set udp2 [new Agent/UDP]
+
+$ns attach-agent $node(41) $udp2
+
+set sink5 [new Agent/LossMonitor]
+
+$ns attach-agent $node(3) $sink5
+$ns connect $udp2 $sink5
+
+$ns at 3.0 " $node(3) color brown" 
+$ns at 3.0 " $node(41) color brown" 
+
+#set a udp connection between node 33 and node 37
+set udp3 [new Agent/UDP]
+
+$ns attach-agent $node(33) $udp3
+
+set sink8 [new Agent/LossMonitor]
+
+$ns attach-agent $node(37) $sink8
+$ns connect $udp3 $sink8
+
+$ns at 5.0 " $node(33) color red" 
+$ns at 5.0 " $node(37) color red" 
+
+
+
+#set a udp connection between node 28 and node 30
+set udp4 [new Agent/UDP]
+
+$ns attach-agent $node(28) $udp4
+
+set sink9 [new Agent/LossMonitor]
+
+$ns attach-agent $node(30) $sink9
+$ns connect $udp4 $sink9
+
+$ns at 1.0 " $node(28) color blue" 
+$ns at 1.0 " $node(30) color blue" 
+
+
+
+#set a udp connection between node 1 and node 16
+set udp5 [new Agent/UDP]
+
+$ns attach-agent $node(1) $udp5
+
+set sink15 [new Agent/LossMonitor]
+
+$ns attach-agent $node(16) $sink15
+$ns connect $udp5 $sink15
+
+$ns at 2.0 " $node(16) color brown" 
+$ns at 2.0 " $node(1) color brown" 
+
+
+proc attach-CBR-traffic { node sink size interval } {
+   #Get an instance of the simulator
+   set ns [Simulator instance]
+   #Create a CBR  agent and attach it to the node
+   set cbr [new Agent/CBR]
+   $ns attach-agent $node $cbr
+   $cbr set packetSize_ $size
+   $cbr set interval_ $interval
+
+   #Attach CBR source to sink;
+   $ns connect $cbr $sink
+   return $cbr
+  }
+
+set cbr1 [attach-CBR-traffic $node(18) $sink4 1000 .45]
+$ns at 2.0 "$cbr1 start"
+set cbr2 [attach-CBR-traffic $node(41) $sink5 1000 .35]
+$ns at 3.0 "$cbr2 start"
+set cbr3 [attach-CBR-traffic $node(33) $sink8 512 .4]
+$ns at 5.0 "$cbr3 start"
+set cbr4 [attach-CBR-traffic $node(47) $sink9 512 .2]
+$ns at 1.0 "$cbr4 start"
+set cbr5 [attach-CBR-traffic $node(45) $sink15 512 .6]
+$ns at 2.0 "$cbr5 start"
+
+
+proc record {} {
+  global  sink4 sink5 sink8 sink9 sink15 
+   #Get An Instance Of The Simulator
+   set ns [Simulator instance]
+   
+   #Set The Time After Which The Procedure Should Be Called Again
+   set time 0.05
+   #How Many Bytes Have Been Received By The Traffic Sinks?
+   set bw0 [$sink4 set npkts_]
+   set bw1 [$sink4 set nlost_]  
+   set bw2 [expr $bw0+ $bw1]
+   set bw3 [$sink5 set npkts_]
+   set bw4 [$sink5 set nlost_]  
+   set bw5 [expr $bw3+ $bw4]
+   
+ set bw6 [$sink8 set npkts_]
+   set bw7 [$sink8 set nlost_]  
+   set bw8 [expr $bw6+ $bw7]
+  
+ set bw9 [$sink9 set npkts_]
+   set bw10 [$sink9 set nlost_]  
+   set bw11 [expr $bw9+ $bw10]
+  
+ set bw12 [$sink15 set npkts_]
+   set bw13 [$sink15 set nlost_]  
+   set bw14 [expr $bw12+ $bw13]
+  
+ 
+  
+   #Get The Current Time
+   set now [$ns now]
+   
+    #Re-Schedule The Procedure
+   $ns at [expr $now+$time] "record"
+  }
+
+
+# printing the window size 
+proc plotWindow {tcpSource file} {
+global ns
+set time 0.01
+set now [$ns now]
+
+set cwnd [$tcpSource set cwnd_]
+puts $file "$now $cwnd"
+$ns at [expr $now+$time] "plotWindow $tcpSource $file" }
+
+
+#Telling nodes when the simulation ends
+for {set i 0} {$i < $val(nn)} { incr i } {
+	$ns at $val(stop) "$node($i) reset" ;
+}
+
+
+###Vampire Attack##########
+
+set ON 1
+set OFF 0
+
+# enable debugging by default
+#set verbose ON
+
+set dos 40
+
+
+set total_host 200000
+
+set probing_port [Application/Worm set ScanPort]
+# probing packet size
+# slammer Worm UDP packets of 404 Bytes
+set p_size 404
+Application/Worm set ScanPacketSize $p_size
+Agent/MessagePassing set packetSize_ $p_size
+
+#	Application/Worm set ScanRate 1
+
+# 1.config the Normal network
+for {set i 0} {$i < 40} {incr i} {
+    set a($i) [new Agent/MessagePassing]
+    $node($i) attach $a($i) $probing_port
+    set w($i) [new Application/Worm/Dnh]
+    $w($i) attach-agent $a($i)
+    $w($i) addr-range 0 [expr $val(nn)- 2]
+    
+}
+
+
+# 2. set up Attacker node
+set a(40) [new Agent/MessagePassing]
+$node(40) attach $a(40) $probing_port
+set w(40) [new Application/Worm/An]
+$w(40) attach-agent $a(40)
+$w(40) addr-range 40 $total_host
+$w(40) dn-range 0 46
+$w(40) v_percent 0.4
+$w(40) beta 0.4
+
+
+# recv all packets coming in
+set p [$node(40) set dmux_]
+$p defaulttarget $a(40) 
+
+#[$node($an_id) entry] defaulttarget $p
+
+# now starts infection
+$ns at 80.0 "$w(40) start"
+$ns at 85.0 "$w(40) stop"
+
+####END Wamipre Attack#######
+
+###### Prevention#############
+$w(40) gamma 1
+
+for {set i 0} {$i < $val(nn) } { incr i } {
+set energy($i) -initialEnergy
+set E($i) $energy($i)
+}
+
+for {set i 0} {$i < $val(nn) } { incr i } {
+if {[set p [$node($i) set $E($i)]] == 0 } {
+
+puts "w($i) blocked by prevention"
+break;
+} else {
+
+puts "w(40) blocked by prevention"
+break;
+}
+
+} 
+#ids module method#######
+for {set i 0} {$i < $val(nn) } { incr i } {
+		
+$ns node-config -adhocRouting idsRPL $node(21)
+ 	
+		set tr($i) [set idsaodv/idsaodv prevention(tr)]
+		if { $tr($i) <= 0 &&  {[set message  != "AODV"] || [set message  != "TCP"] || [set message  != "UDP"] || [set message  != "cbr"] {[set p [$node(40) set dmux_]] < 0.02}} } {
+		$ns compute-routes
+		
+		} 
+	if { $tr($i) > 0.2 && $tr($i) <= 0.8} {
+		set recv $recvReply
+	} else {
+			set hello [set idsaodv/idsaodv sendHello()]
+		}
+		
+      }
+
+##################### Prevention#############
+
+
+
+#Telling nodes when the simulation ends
+for {set i 0} {$i < $val(nn)} { incr i } {
+	$ns at $val(stop) "$node($i) reset" ;
+}
+
+#start ftp transmission
+$ns at 5.0 "$node(17) label \"FTP\""
+$ns at 5.0 "$node(4) label \"FTP\""
+$ns at 5.0 "$node(42) label \"FTP\""
+$ns at 1.0 "$node(44) label \"FTP\""
+$ns at 4.0 "$node(32) label \"FTP\""
+$ns at 4.0 "$node(3) label \"FTP\""
+$ns at 2.0 "$node(9) label \"FTP\""
+$ns at 4.0 "$node(36) label \"FTP\""
+$ns at 1.0 "$node(39) label \"FTP\""
+$ns at 4.0 "$node(14) label \"FTP\""
+$ns at 2.0 "$node(10) label \"CBR\""
+$ns at 2.0 "$node(18) label \"CBR\""
+$ns at 3.0 "$node(41) label \"CBR\""
+$ns at 3.0 "$node(3) label \"CBR\""
+$ns at 3.0 "$node(39) label \"CBR\""
+$ns at 4.0 "$node(14) label \"CBR\""
+$ns at 3.0 "$node(1) label \"CBR\""
+$ns at 1.0 "$node(16) label \"CBR\""
+$ns at 0.1 "$node(21) label \"Preventor\""
+
+#Node Movment with Trace Information 
+$ns at 1.0 "$ns trace-annotate \"Node's Move\""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 17 TO 4 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 42 TO 44 \""
+$ns at 5.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 3 TO 32 \""
+$ns at 4.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 9 TO 36 \""
+$ns at 1.0 "$ns trace-annotate \"TCP Over FTP Packet TX. Start From 39 TO 14 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 10 TO 18 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 41 TO 3 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 33 TO 37 \""
+$ns at 2.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 28 TO 30 \""
+$ns at 3.0 "$ns trace-annotate \"UDP Over CBR Packet TX. Start From 1 TO 16 \""
+
+
+#ending nam and the simualtion 
+$ns at $val(stop) "$ns nam-end-wireless $val(stop)"
+$ns at $val(stop) "stop"
+$ns at 100.01 "puts \"end simulation\" ; $ns halt"
+
+proc stop {} {
+
+	global ns tracefd namtrcae
+	$ns flush-trace
+	close $tracefd
+	exit 0
+}
+
+
+$ns at 0.0 "record"
+
+$ns run
+
+
+        
